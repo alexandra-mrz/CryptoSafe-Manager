@@ -1,0 +1,53 @@
+import threading
+import time
+from typing import Optional
+SESSION_LOCKED = "locked"
+SESSION_UNLOCKED = "unlocked"
+class StateManager:
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._session_state = SESSION_LOCKED
+        self._clipboard_content: Optional[str] = None
+        self._clipboard_timer_end: Optional[float] = None
+        self._last_activity_time: Optional[float] = None
+    @property
+    def session_state(self) -> str:
+        with self._lock:
+            return self._session_state
+    def set_session_unlocked(self) -> None:
+        with self._lock:
+            self._session_state = SESSION_UNLOCKED
+            self._last_activity_time = time.time()
+    def set_session_locked(self) -> None:
+        with self._lock:
+            self._session_state = SESSION_LOCKED
+            self._clipboard_content = None
+            self._clipboard_timer_end = None
+    @property
+    def clipboard_content(self) -> Optional[str]:
+        with self._lock:
+            return self._clipboard_content
+    def set_clipboard(self, content: Optional[str], clear_after_seconds: Optional[float] = None) -> None:
+        with self._lock:
+            self._clipboard_content = content
+            self._clipboard_timer_end = (time.time() + clear_after_seconds) if clear_after_seconds else None
+    def get_clipboard_timer_remaining(self) -> Optional[float]:
+        with self._lock:
+            if self._clipboard_timer_end is None:
+                return None
+            remain = self._clipboard_timer_end - time.time()
+            return max(0.0, remain) if remain > 0 else 0.0
+    def touch_activity(self) -> None:
+        with self._lock:
+            self._last_activity_time = time.time()
+    def get_idle_seconds(self) -> float:
+        with self._lock:
+            if self._last_activity_time is None:
+                return 0.0
+            return time.time() - self._last_activity_time
+_state: Optional[StateManager] = None
+def get_state_manager() -> StateManager:
+    global _state
+    if _state is None:
+        _state = StateManager()
+    return _state
