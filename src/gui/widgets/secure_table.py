@@ -1,41 +1,41 @@
-# SecureTable — таблица для записей хранилища
+from __future__ import annotations
 
-from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QHeaderView, QAbstractItemView
+from PyQt6.QtWidgets import QHeaderView, QTableWidget, QTableWidgetItem
 
 
-class SecureTable(QWidget):
-    """Таблица для отображения записей vault (title, username, url и т.д.)."""
+# простая таблица-заглушка для записей хранилища
+class SecureTable(QTableWidget):
 
-    COLUMNS = ("title", "username", "url", "updated_at")
-
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self._table = QTableWidget()
-        self._table.setColumnCount(len(self.COLUMNS))
-        self._table.setHorizontalHeaderLabels([c.replace("_", " ").title() for c in self.COLUMNS])
-        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self._table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self._table.setSelectionMode(QAbstractItemView.SingleSelection)
-        layout.addWidget(self._table)
-        self._row_to_id = {}
+        self.setColumnCount(3)
+        self.setHorizontalHeaderLabels(["Title", "Username", "URL"])
+        # убираем светлую нумерацию строк слева
+        self.verticalHeader().setVisible(False)
+        # не используем чередование цветов
+        self.setAlternatingRowColors(False)
+        # растягиваем столбцы на всю ширину
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self._fill_placeholder_rows()
 
-    def clear(self):
-        self._table.setRowCount(0)
-        self._row_to_id.clear()
+    def _fill_placeholder_rows(self) -> None:
+        self.setRowCount(3)
+        demo = [
+            ("Example 1", "user1", "https://example.com"),
+            ("Example 2", "user2", "https://wallet.com"),
+            ("Example 3", "user3", "https://crypto.com"),
+        ]
+        for row, (title, username, url) in enumerate(demo):
+            self.setItem(row, 0, QTableWidgetItem(title))
+            self.setItem(row, 1, QTableWidgetItem(username))
+            self.setItem(row, 2, QTableWidgetItem(url))
 
-    def add_row(self, entry_id, title, username, url, updated_at):
-        row = self._table.rowCount()
-        self._table.insertRow(row)
-        for c, val in enumerate((title or "", username or "", url or "", updated_at or "")):
-            self._table.setItem(row, c, QTableWidgetItem(str(val)))
-        self._row_to_id[row] = entry_id
-        return row
+    def set_language(self, code: str) -> None:
+        # простая смена заголовков таблицы в зависимости от языка
+        if code == "ru":
+            labels = ["Название", "Пользователь", "URL"]
+        else:
+            labels = ["Title", "Username", "URL"]
+        self.setHorizontalHeaderLabels(labels)
 
-    def get_selected_id(self):
-        row = self._table.currentRow()
-        return self._row_to_id.get(row) if row >= 0 else None
-
-    def get_selected_iid(self):
-        return self._table.currentRow()

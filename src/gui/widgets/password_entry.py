@@ -1,44 +1,35 @@
-# PasswordEntry — поле ввода с маскировкой и кнопкой показа (кнопка с фиксированной шириной, всегда видна)
+from __future__ import annotations
 
-from PyQt5.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton, QWidget
 
 
+# простое поле ввода пароля с кнопкой показать/скрыть
 class PasswordEntry(QWidget):
-    """Поле ввода пароля с маскировкой и кнопкой показа/скрытия."""
 
-    def __init__(self, parent=None, show_char="*"):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self._show_char = show_char
-        self._visible = False
+
+        self._edit = QLineEdit(self)
+        self._edit.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self._toggle_button = QPushButton("👁", self)
+        self._toggle_button.setCheckable(True)
+        self._toggle_button.clicked.connect(self._on_toggle_clicked)
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        self._entry = QLineEdit()
-        self._entry.setEchoMode(QLineEdit.Password)
-        self._entry.setPlaceholderText("")
-        layout.addWidget(self._entry, 1)
-        self._btn = QPushButton("Показать")
-        self._btn.setMaximumWidth(90)
-        self._btn.clicked.connect(self._toggle)
-        layout.addWidget(self._btn, 0)
-        self.setFocusProxy(self._entry)
+        layout.addWidget(self._edit)
+        layout.addWidget(self._toggle_button)
 
-    def _toggle(self):
-        self._visible = not self._visible
-        if self._visible:
-            self._entry.setEchoMode(QLineEdit.Normal)
-            self._btn.setText("Скрыть")
+    def _on_toggle_clicked(self) -> None:
+        if self._toggle_button.isChecked():
+            self._edit.setEchoMode(QLineEdit.EchoMode.Normal)
         else:
-            self._entry.setEchoMode(QLineEdit.Password)
-            self._btn.setText("Показать")
+            self._edit.setEchoMode(QLineEdit.EchoMode.Password)
 
-    def text(self):
-        return self._entry.text()
+    def text(self) -> str:
+        return self._edit.text()
 
-    def setText(self, value: str):
-        self._entry.setText(value)
+    def setText(self, text: str) -> None:  # noqa: N802
+        self._edit.setText(text)
 
-    def get(self):
-        return self._entry.text()
-
-    def set(self, value: str):
-        self._entry.setText(value)

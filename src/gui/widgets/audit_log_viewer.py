@@ -1,19 +1,14 @@
-# AuditLogViewer — просмотр логов аудита
+from __future__ import annotations
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QDialog
 
 
-class AuditLogViewer(QWidget):
-    """Окно просмотра логов аудита."""
+# заглушка для будущего просмотра журнала аудита
+class AuditLogViewer(QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QDialog | None = None) -> None:
         super().__init__(parent)
+        self.setWindowTitle("Журнал аудита")
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Журнал аудита"))
-        self._text = QTextEdit()
-        self._text.setReadOnly(True)
-        self._text.setPlaceholderText("Здесь выводятся записи журнала аудита.")
-        layout.addWidget(self._text)
+        layout.addWidget(QLabel("AuditLogViewer: здесь будут логи аудита."))
 
-    def append_log(self, line: str):
-        self._text.append(line)
