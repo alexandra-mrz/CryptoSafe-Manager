@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # схема таблиц и инициализация БД
@@ -195,4 +196,3 @@ def _migrate_v2_to_v3(cur: sqlite3.Cursor) -> None:
     cur.execute(
         "CREATE INDEX IF NOT EXISTS idx_key_store_type ON key_store (key_type);"
     )
-

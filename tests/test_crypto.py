@@ -1,3 +1,4 @@
+
 import unittest
 
 from src.core.crypto.abstract import EncryptionService
@@ -32,5 +33,3 @@ class TestKeyManager(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

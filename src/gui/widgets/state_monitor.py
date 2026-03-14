@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from PyQt6.QtCore import QTimer
@@ -36,4 +37,3 @@ class StateMonitor(QDialog):
         self._session_label.setText(f"Сессия: {'заблокирована' if state.locked else 'разблокирована'}")
         self._clipboard_label.setText(f"Буфер: {state.clipboard_seconds_left} с до очистки")
         self._inactivity_label.setText(f"Неактивность: {state.inactivity_seconds} с")
-

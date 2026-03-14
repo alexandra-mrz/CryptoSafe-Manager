@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from PyQt6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton, QWidget
@@ -32,4 +33,3 @@ class PasswordEntry(QWidget):
 
     def setText(self, text: str) -> None:  # noqa: N802
         self._edit.setText(text)
-

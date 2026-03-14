@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # пакет для переиспользуемых виджетов gui

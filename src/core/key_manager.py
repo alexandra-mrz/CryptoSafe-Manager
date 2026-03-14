@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # простой keymanager для спринта 1
@@ -41,4 +42,3 @@ class KeyManager:
     def load_key(self, key_id: str) -> bytes:
         # cry-3: заглушка для загрузки ключа (будет реализована в sprint 2)
         raise NotImplementedError("load_key() будет реализован в Sprint 2.")
-

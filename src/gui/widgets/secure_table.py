@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from PyQt6.QtWidgets import QHeaderView, QTableWidget, QTableWidgetItem
@@ -36,4 +37,3 @@ class SecureTable(QTableWidget):
         else:
             labels = ["Title", "Username", "URL"]
         self.setHorizontalHeaderLabels(labels)
-

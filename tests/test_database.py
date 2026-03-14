@@ -1,3 +1,4 @@
+
 import os
 import sqlite3
 import tempfile
@@ -52,5 +53,3 @@ class TestDatabaseConnectivityAndSchema(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

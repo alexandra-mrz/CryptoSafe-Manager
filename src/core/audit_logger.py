@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # система аудита: обработчики evt-2 пишут события в таблицу audit_log
@@ -63,4 +64,3 @@ def setup_audit_subscribers(bus: EventBus | None = None) -> None:
 
 # при импорте модуля сразу настраиваем подписки
 setup_audit_subscribers()
-

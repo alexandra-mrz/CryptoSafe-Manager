@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # вспомогательные функции для работы с чувствительными данными в памяти (cry-4)
@@ -13,4 +14,3 @@ def zero_bytearray(data: bytearray) -> None:
 
     buf = (ctypes.c_char * length).from_buffer(data)
     ctypes.memset(buf, 0, length)
-

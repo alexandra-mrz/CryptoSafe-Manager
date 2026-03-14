@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -27,4 +28,3 @@ class EncryptionService:
     def decrypt_with_manager(self, ciphertext: bytes, key_manager: "KeyManager", key_id: str) -> bytes:
         key = key_manager.load_key(key_id)
         return self.decrypt(ciphertext, key)
-

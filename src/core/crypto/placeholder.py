@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # заглушка aes256placeholder: вместо реального aes используется простое xor-шифрование по байтам
@@ -28,4 +29,3 @@ class AES256Placeholder(EncryptionService):
 
 def get_default_encryption_service() -> EncryptionService:
     return AES256Placeholder()
-

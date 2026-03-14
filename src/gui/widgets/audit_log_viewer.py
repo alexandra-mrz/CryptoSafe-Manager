@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QDialog
@@ -11,4 +12,3 @@ class AuditLogViewer(QDialog):
         self.setWindowTitle("Журнал аудита")
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("AuditLogViewer: здесь будут логи аудита."))
-

@@ -9,4 +9,3 @@ COPY src ./src
 COPY data ./data
 
 CMD ["python", "-m", "src"]
-

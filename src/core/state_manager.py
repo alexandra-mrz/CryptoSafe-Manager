@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # состояние сессии, буфер, неактивность, настройки из settings
@@ -152,4 +153,3 @@ def get_state_manager() -> StateManager:
     if _state_manager is None:
         _state_manager = StateManager()
     return _state_manager
-

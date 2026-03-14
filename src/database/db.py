@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 # простой помощник для работы с sqlite
@@ -40,4 +41,3 @@ class Database:
 def get_default_database() -> Database:
     # утилита для создания стандартного экземпляра базы данных
     return Database()
-

@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -423,4 +424,3 @@ def run_app() -> None:
 
     window.show()
     sys.exit(app.exec())
-

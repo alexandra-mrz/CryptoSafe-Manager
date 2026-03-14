@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from PyQt6.QtCore import pyqtSignal
@@ -117,4 +118,3 @@ class SettingsDialog(QDialog):
         theme_code = self.theme_combo.currentData()
         if isinstance(theme_code, str):
             self.themeChanged.emit(theme_code)
-

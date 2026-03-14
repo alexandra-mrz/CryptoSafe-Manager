@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import json
@@ -77,4 +78,3 @@ class ConfigManager:
 
 def get_default_config_manager() -> ConfigManager:
     return ConfigManager()
-

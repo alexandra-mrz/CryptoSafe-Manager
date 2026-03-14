@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from PyQt6.QtWidgets import (
@@ -92,4 +93,3 @@ class SetupWizard(QDialog):
             QMessageBox.warning(self, "Ошибка", str(e))
             return
         super().accept()
-
