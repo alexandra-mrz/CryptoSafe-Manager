@@ -1,0 +1,4 @@
+PyQt6==6.7.0
+pyautogui==0.9.54
+argon2-cffi==23.1.0
+keyring>=24.0.0
