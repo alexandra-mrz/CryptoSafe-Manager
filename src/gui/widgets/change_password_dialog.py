@@ -22,7 +22,10 @@ from src.core.crypto.authentication import (
 from src.core.crypto.key_derivation import derive_key_argon2, derive_key_pbkdf2
 from src.core.crypto.key_storage import save_key_metadata, cache_key
 from src.core.crypto.placeholder import AES256Placeholder
+from src.core.vault.encryption_service import VaultEncryptionService
+from src.core.events import get_event_bus
 from src.database.db import get_default_database
+from src.gui.ux_helpers import show_user_error
 
 from .password_entry import PasswordEntry
 
@@ -30,6 +33,7 @@ from .password_entry import PasswordEntry
 class ChangePasswordDialog(QDialog):
     # диалог смены мастер-пароля (CHANGE-1)
 
+    """Публичный класс ChangePasswordDialog."""
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Смена мастер-пароля")
@@ -75,13 +79,14 @@ class ChangePasswordDialog(QDialog):
 
         try:
             self._rotate_keys(old_pwd, new_pwd)
-        except ValueError as e:
-            QMessageBox.warning(self, "Ошибка", str(e))
+        except ValueError:
+            show_user_error(self, "wrong_password")
             return
         except Exception:
-            QMessageBox.warning(self, "Ошибка", "Не удалось обновить шифрование.")
+            show_user_error(self, "change_password_failed")
             return
 
+        get_event_bus().publish("PasswordChanged", {"source": "change_password_dialog"})
         QMessageBox.information(self, "Готово", "Мастер-пароль успешно изменён.")
         self.accept()
 
@@ -93,10 +98,21 @@ class ChangePasswordDialog(QDialog):
         db = get_default_database()
         conn = db.create_connection()
         cipher = AES256Placeholder()
+        vault_cipher = VaultEncryptionService()
 
         try:
             cur = conn.cursor()
-            cur.execute("SELECT id, encrypted_password FROM vault_entries")
+            # Поддерживаем обе схемы:
+            # - Sprint 2: encrypted_password (TEXT hex)
+            # - Sprint 3+: encrypted_data (BLOB)
+            cur.execute("PRAGMA table_info(vault_entries)")
+            columns = [row[1] for row in cur.fetchall()]
+            has_new_schema = "encrypted_data" in columns
+
+            if has_new_schema:
+                cur.execute("SELECT id, encrypted_data FROM vault_entries")
+            else:
+                cur.execute("SELECT id, encrypted_password FROM vault_entries")
             rows = cur.fetchall()
             total = len(rows)
 
@@ -117,9 +133,28 @@ class ChangePasswordDialog(QDialog):
                     raise RuntimeError("отменено пользователем")
 
                 entry_id = row["id"]
-                enc_value = row["encrypted_password"]
-                if enc_value:
-                    try:
+                if has_new_schema:
+                    enc_value = row["encrypted_data"]
+                    if enc_value:
+                        payload = vault_cipher.decrypt_entry(bytes(enc_value), old_key)
+                        data = payload.get("data") or {}
+                        if not isinstance(data, dict):
+                            data = {}
+                        created_at_payload = str(payload.get("created_at", "") or "")
+                        version_payload = int(payload.get("v", 1) or 1)
+                        new_blob = vault_cipher.encrypt_entry(
+                            data,
+                            new_key,
+                            created_at=created_at_payload,
+                            version=version_payload,
+                        )
+                        cur.execute(
+                            "UPDATE vault_entries SET encrypted_data = ? WHERE id = ?",
+                            (new_blob, entry_id),
+                        )
+                else:
+                    enc_value = row["encrypted_password"]
+                    if enc_value:
                         old_bytes = bytes.fromhex(enc_value)
                         plain = cipher.decrypt(old_bytes, old_key)
                         new_bytes = cipher.encrypt(plain, new_key)
@@ -127,8 +162,6 @@ class ChangePasswordDialog(QDialog):
                             "UPDATE vault_entries SET encrypted_password = ? WHERE id = ?",
                             (new_bytes.hex(), entry_id),
                         )
-                    except Exception:
-                        raise
 
                 progress.setValue(index + 1)
                 QApplication.processEvents()

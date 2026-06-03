@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
 from src.database.db import get_default_database
 
 from src.core.crypto.authentication import set_master_password, unlock_session
+from src.gui.ux_helpers import show_exception
 
 from .password_entry import PasswordEntry
 
@@ -23,6 +24,7 @@ from .password_entry import PasswordEntry
 # простой мастер первого запуска
 class SetupWizard(QDialog):
 
+    """Публичный класс SetupWizard."""
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Первый запуск")
@@ -69,6 +71,7 @@ class SetupWizard(QDialog):
     # проверяем, что мастер-пароль введён и совпадает с подтверждением
     # без этого мастер не закрывается
     def accept(self) -> None:
+        """Accept."""
         pwd = self.master_password.text()
         confirm = self.master_confirm.text()
         db_path = self.db_path_edit.text().strip()
@@ -89,7 +92,7 @@ class SetupWizard(QDialog):
             get_default_database()
             set_master_password(pwd)
             unlock_session(pwd)
-        except ValueError as e:
-            QMessageBox.warning(self, "Ошибка", str(e))
+        except ValueError as exc:
+            show_exception(self, exc, code="setup_failed")
             return
         super().accept()

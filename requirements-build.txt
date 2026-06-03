@@ -1,0 +1,2 @@
+# Sprint 8 / PKG-1: зависимости только для сборки executable (PyInstaller)
+pyinstaller==6.20.0

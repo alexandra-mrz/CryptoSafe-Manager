@@ -1,44 +1,27 @@
 
 from __future__ import annotations
 
-# простой keymanager для спринта 1
-# cry-3: здесь только заготовки методов, чтобы
-# в следующих спринтах добавить реальную логику
+# KeyManager для Sprint 2/3: ключ шифрования хранится в кэше в памяти.
+# На диск ключ не пишем. Если ключа нет в кэше, можно пересчитать через мастер-пароль.
 
 from typing import Optional
 
-from .crypto.abstract import EncryptionService
-from .crypto.memory import zero_bytearray
-from .crypto.placeholder import AES256Placeholder
-
+from src.core.crypto.authentication import get_encryption_key, is_session_unlocked
+from src.core.crypto.key_storage import get_cached_key
 
 class KeyManager:
-    # небольшой менеджер ключей
+    """Публичный класс KeyManager."""
+    def get_vault_encryption_key(self, master_password: str = "") -> bytes:
+        # ARC-3: операции хранилища должны использовать ключ шифрования из кэша KeyManager.
+        """Get vault encryption key."""
+        if not is_session_unlocked():
+            raise PermissionError("сессия заблокирована")
 
-    def __init__(self, service: Optional[EncryptionService] = None) -> None:
-        self.service = service or AES256Placeholder()
-
-    def derive_key(self, password: str, salt: bytes) -> bytes:
-        # cry-3: заглушка функции derive_key
-        # сейчас это очень простая логика, которую
-        # можно будет заменить на нормальный kdf
-        # перевод пароля в байты, чтобы потом занулить
-        password_bytes = bytearray(password.encode("utf-8"))
-
-        try:
-            # простая псевдо-kdf: повтор пароля и соли
-            combined = bytes(password_bytes) + salt
-            # берём первые 32 байта и при необходимости дополняем нулями
-            key = combined[:32].ljust(32, b"\0")
+        key = get_cached_key("master_enc")
+        if key is not None:
             return key
-        finally:
-            # cry-4: зануляем пароль в памяти, чтобы он не оставался в bytearray
-            zero_bytearray(password_bytes)
 
-    def store_key(self, key_id: str, key: bytes) -> None:
-        # cry-3: заглушка для хранения ключа (будет реализована в sprint 2)
-        raise NotImplementedError("store_key() будет реализован в Sprint 2.")
+        if not master_password:
+            raise PermissionError("ключ не в кэше (нужен мастер-пароль)")
 
-    def load_key(self, key_id: str) -> bytes:
-        # cry-3: заглушка для загрузки ключа (будет реализована в sprint 2)
-        raise NotImplementedError("load_key() будет реализован в Sprint 2.")
+        return get_encryption_key(master_password)

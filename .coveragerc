@@ -1,0 +1,25 @@
+[run]
+source = src
+# pytest --cov=src (Sprint 8 / TEST-2)
+# Не входят в процент coverage (но покрыты отдельными тестами):
+#   src/gui/* — PyQt (ручное тестирование)
+#   точки входа и NotImplemented-заглушки
+#   qr_code_service — pyzbar/camera (test_sprint6_validation)
+#   platform_security / platform_adapter — OS API (test_sprint7_platform, clipboard)
+omit =
+    src/gui/*
+    src/__main__.py
+    src/bootstrap.py
+    src/core/import_export/future_integrations.py
+    src/core/audit_logger.py
+    src/core/import_export/qr_code_service.py
+    src/core/security/platform_security.py
+    src/core/clipboard/platform_adapter.py
+
+[report]
+precision = 1
+show_missing = false
+skip_empty = true
+
+[html]
+directory = tests/report/coverage_html

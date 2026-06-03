@@ -14,6 +14,7 @@ CONFIG_FILE_NAME = "config.json"
 class AppConfig:
     # объект конфигурации для настроек, которые хранятся в локальном файле, а не в базе данных
 
+    """Публичный класс AppConfig."""
     db_path: str = "data/cryptosafe.db"
 
     encryption_enabled: bool = True
@@ -24,6 +25,7 @@ class AppConfig:
 
 
 class ConfigManager:
+    """Публичный класс ConfigManager."""
     def __init__(self, config_path: str | Path | None = None) -> None:
         if config_path is None:
             self._config_path = Path(CONFIG_FILE_NAME)
@@ -34,6 +36,7 @@ class ConfigManager:
         self.load()
 
     def load(self) -> None:
+        """Load."""
         if not self._config_path.is_file():
             return
 
@@ -60,15 +63,18 @@ class ConfigManager:
         )
 
     def save(self) -> None:
+        """Save."""
         self._config_path.parent.mkdir(parents=True, exist_ok=True)
         data = asdict(self.config)
         text = json.dumps(data, indent=4, sort_keys=True)
         self._config_path.write_text(text, encoding="utf-8")
 
     def get(self, name: str) -> Any:
+        """Get."""
         return getattr(self.config, name)
 
     def set(self, name: str, value: Any) -> None:
+        """Set."""
         if not hasattr(self.config, name):
             raise AttributeError(f"unknown config field: {name}")
 
@@ -77,4 +83,5 @@ class ConfigManager:
 
 
 def get_default_config_manager() -> ConfigManager:
+    """Get default config manager."""
     return ConfigManager()

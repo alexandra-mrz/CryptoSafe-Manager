@@ -14,6 +14,7 @@ _KEY_CACHE_TIMEOUT_SECONDS = 3600
 
 
 def cache_key(key_id: str, key: bytes) -> None:
+    """Cache key."""
     from src.core.crypto.authentication import is_session_unlocked
     if not is_session_unlocked():
         return
@@ -23,6 +24,7 @@ def cache_key(key_id: str, key: bytes) -> None:
 
 
 def get_cached_key(key_id: str) -> Optional[bytes]:
+    """Get cached key."""
     data = _key_cache.get(key_id)
     if data is None:
         return None
@@ -30,12 +32,14 @@ def get_cached_key(key_id: str) -> Optional[bytes]:
 
 
 def clear_all_keys() -> None:
+    """Clear all keys."""
     for key_id, data in _key_cache.items():
         zero_bytearray(data)
     _key_cache.clear()
 
 
 def set_app_active(active: bool) -> None:
+    """Set app active."""
     global _app_active
     _app_active = active
     if not active:
@@ -43,6 +47,7 @@ def set_app_active(active: bool) -> None:
 
 
 def update_cache_activity(inactivity_seconds: int) -> None:
+    """Update cache activity."""
     if inactivity_seconds >= _KEY_CACHE_TIMEOUT_SECONDS:
         clear_all_keys()
 
@@ -53,6 +58,7 @@ from datetime import datetime
 
 
 def save_key_metadata(key_type: str, salt: str, hash_value: str, params: str) -> None:
+    """Save key metadata."""
     db = get_default_database()
     conn = db.create_connection()
     try:
@@ -104,6 +110,7 @@ def _update_params_row(cur, now: str, auth_salt_hex: str = "", auth_params: str 
 
 
 def load_key_metadata(key_type: str) -> Optional[dict]:
+    """Load key metadata."""
     db = get_default_database()
     conn = db.create_connection()
     try:
@@ -158,6 +165,7 @@ def _fallback_path(key_id: str) -> Path:
 
 
 def store_in_os_keychain(service_name: str, key_id: str, secret: str) -> None:
+    """Store in os keychain."""
     if _keyring_ok:
         try:
             keyring.set_password(service_name, key_id, secret)
@@ -172,6 +180,7 @@ def store_in_os_keychain(service_name: str, key_id: str, secret: str) -> None:
 
 
 def load_from_os_keychain(service_name: str, key_id: str) -> Optional[str]:
+    """Load from os keychain."""
     if _keyring_ok:
         try:
             value = keyring.get_password(service_name, key_id)

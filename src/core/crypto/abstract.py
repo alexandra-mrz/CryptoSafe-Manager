@@ -13,18 +13,23 @@ if TYPE_CHECKING:
 class EncryptionService:
     # базовые методы, которые работают с уже готовым байтовым ключом
 
+    """Публичный класс EncryptionService."""
     def encrypt(self, data: bytes, key: bytes) -> bytes:
+        """Encrypt."""
         raise NotImplementedError("encrypt() должен быть реализован в наследнике.")
 
     def decrypt(self, ciphertext: bytes, key: bytes) -> bytes:
+        """Decrypt."""
         raise NotImplementedError("decrypt() должен быть реализован в наследнике.")
 
     # методы второго спринта: принимают keymanager вместо сырого ключа
 
     def encrypt_with_manager(self, data: bytes, key_manager: "KeyManager", key_id: str) -> bytes:
+        """Encrypt with manager."""
         key = key_manager.load_key(key_id)
         return self.encrypt(data, key)
 
     def decrypt_with_manager(self, ciphertext: bytes, key_manager: "KeyManager", key_id: str) -> bytes:
+        """Decrypt with manager."""
         key = key_manager.load_key(key_id)
         return self.decrypt(ciphertext, key)

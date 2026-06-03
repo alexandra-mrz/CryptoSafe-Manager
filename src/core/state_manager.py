@@ -20,6 +20,7 @@ SETTING_AUTO_LOCK_TIMEOUT = "auto_lock_timeout"
 
 @dataclass
 class AppState:
+    """Публичный класс AppState."""
     locked: bool = True
     clipboard_seconds_left: int = 0
     inactivity_seconds: int = 0
@@ -29,6 +30,7 @@ class AppState:
 
 
 class StateManager:
+    """Публичный класс StateManager."""
     def __init__(self, env: Optional[str] = None) -> None:
         self._db = get_default_database()
         self._bus: EventBus = get_event_bus()
@@ -43,6 +45,7 @@ class StateManager:
         self._bus.subscribe("UserLoggedOut", self._on_user_logged_out)
         self._bus.subscribe("ClipboardCopied", self._on_clipboard_copied)
         self._bus.subscribe("ClipboardCleared", self._on_clipboard_cleared)
+        self._bus.subscribe("UserActivity", self._on_user_activity)
 
         self._load_initial_config()
 
@@ -52,6 +55,7 @@ class StateManager:
         return f"{self.env}.{base_key}"
 
     def get_setting(self, base_key: str, default: Any | None = None) -> Any:
+        """Get setting."""
         key = self._make_key(base_key)
         conn = self._db.create_connection()
         try:
@@ -69,6 +73,7 @@ class StateManager:
             conn.close()
 
     def set_setting(self, base_key: str, value: Any, *, encrypted: bool = False) -> None:
+        """Set setting."""
         key = self._make_key(base_key)
         conn = self._db.create_connection()
         try:
@@ -100,6 +105,27 @@ class StateManager:
             self.set_setting(SETTING_KEY_PARAMS, '{"pbkdf2_iterations": 100000}')
         if self.get_setting(SETTING_AUTO_LOCK_TIMEOUT, None) is None:
             self.set_setting(SETTING_AUTO_LOCK_TIMEOUT, "5")
+        # CFG-1/CFG-3: настройки буфера по умолчанию
+        if self.get_setting("clipboard_notifications_enabled", None) is None:
+            self.set_setting("clipboard_notifications_enabled", "1", encrypted=True)
+        if self.get_setting("clipboard_security_level", None) is None:
+            self.set_setting("clipboard_security_level", "basic", encrypted=True)
+        if self.get_setting("clipboard_app_whitelist", None) is None:
+            self.set_setting("clipboard_app_whitelist", "", encrypted=True)
+        if self.get_setting("activity_sensitivity", None) is None:
+            self.set_setting("activity_sensitivity", "medium", encrypted=True)
+        if self.get_setting("device_type", None) is None:
+            self.set_setting("device_type", "desktop", encrypted=True)
+        if self.get_setting("minimize_to_tray", None) is None:
+            self.set_setting("minimize_to_tray", "1", encrypted=True)
+        if self.get_setting("start_minimized", None) is None:
+            self.set_setting("start_minimized", "0", encrypted=True)
+        if self.get_setting("panic_stealth_mode", None) is None:
+            self.set_setting("panic_stealth_mode", "0", encrypted=True)
+        if self.get_setting("panic_quit_app", None) is None:
+            self.set_setting("panic_quit_app", "0", encrypted=True)
+        if self.get_setting("security_profile", None) is None:
+            self.set_setting("security_profile", "standard", encrypted=True)
 
     def _on_user_logged_in(self, event: str, payload: Any) -> None:
         self.state.locked = False
@@ -122,6 +148,10 @@ class StateManager:
     def _on_clipboard_cleared(self, event: str, payload: Any) -> None:
         self.state.clipboard_seconds_left = 0
 
+    def _on_user_activity(self, event: str, payload: Any) -> None:
+        self.state.inactivity_seconds = 0
+        self.state.last_activity_timestamp = time.time()
+
     def _loop(self) -> None:
         while not self._stop_event.is_set():
             time.sleep(1.0)
@@ -129,18 +159,9 @@ class StateManager:
             if self.state.clipboard_seconds_left > 0:
                 self.state.clipboard_seconds_left -= 1
             update_cache_activity(self.state.inactivity_seconds)
-            # авто-блокировка по таймауту неактивности
-            try:
-                timeout_min = int(self.get_setting(SETTING_AUTO_LOCK_TIMEOUT, "5"))
-            except (ValueError, TypeError):
-                timeout_min = 5
-            timeout_sec = timeout_min * 60
-            if not self.state.locked and self.state.inactivity_seconds >= timeout_sec:
-                clear_all_keys()
-                self.state.locked = True
-                self._bus.publish("UserLoggedOut", None)
 
     def stop(self) -> None:
+        """Stop."""
         self._stop_event.set()
         self._thread.join(timeout=1.0)
 
@@ -149,6 +170,7 @@ _state_manager: Optional[StateManager] = None
 
 
 def get_state_manager() -> StateManager:
+    """Get state manager."""
     global _state_manager
     if _state_manager is None:
         _state_manager = StateManager()

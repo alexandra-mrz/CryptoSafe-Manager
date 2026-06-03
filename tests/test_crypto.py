@@ -2,8 +2,8 @@
 import unittest
 
 from src.core.crypto.abstract import EncryptionService
+from src.core.crypto.key_derivation import derive_key_pbkdf2
 from src.core.crypto.placeholder import AES256Placeholder
-from src.core.key_manager import KeyManager
 
 
 class TestEncryptionPlaceholder(unittest.TestCase):
@@ -26,8 +26,8 @@ class TestEncryptionPlaceholder(unittest.TestCase):
 
 class TestKeyManager(unittest.TestCase):
     def test_derive_key_length(self) -> None:
-        km = KeyManager()
-        key = km.derive_key("password", b"salt")
+        # KeyManager в Sprint 2/3 не держит derive_key: KDF в key_derivation, ключ в кэше.
+        key = derive_key_pbkdf2("password", b"salt")
         self.assertEqual(len(key), 32)
 
 

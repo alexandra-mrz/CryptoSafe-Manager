@@ -20,6 +20,7 @@ class _Subscription:
 
 
 class EventBus:
+    """Публичный класс EventBus."""
     def __init__(self) -> None:
         self._handlers: Dict[str, List[_Subscription]] = {}
         self._queue: "queue.Queue[tuple[str, Any, EventHandler]]" = queue.Queue()
@@ -30,10 +31,12 @@ class EventBus:
     # ===== Подписка и публикация =====
 
     def subscribe(self, event_name: str, handler: EventHandler, *, async_handler: bool = False) -> None:
+        """Subscribe."""
         subs = self._handlers.setdefault(event_name, [])
         subs.append(_Subscription(event_name, handler, async_handler))
 
     def publish(self, event_name: str, payload: Any = None) -> None:
+        """Publish."""
         for sub in self._handlers.get(event_name, []):
             if sub.is_async:
                 self._queue.put((event_name, payload, sub.handler))
@@ -54,7 +57,13 @@ class EventBus:
             finally:
                 self._queue.task_done()
 
+    def drain_async_handlers(self, timeout: float = 5.0) -> None:
+        # дождаться обработки очереди (перед проверкой целостности аудита)
+        """Drain async handlers."""
+        self._queue.join()
+
     def stop(self) -> None:
+        """Stop."""
         self._stop_event.set()
         self._worker.join(timeout=1.0)
 
@@ -63,4 +72,5 @@ _event_bus = EventBus()
 
 
 def get_event_bus() -> EventBus:
+    """Get event bus."""
     return _event_bus

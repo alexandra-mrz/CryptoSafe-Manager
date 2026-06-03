@@ -35,8 +35,13 @@ class TestDatabaseConnectivityAndSchema(unittest.TestCase):
             names = {row[0] for row in cur.fetchall()}
             self.assertIn("vault_entries", names)
             self.assertIn("audit_log", names)
+            self.assertIn("audit_public_keys", names)
+            self.assertIn("audit_security_log", names)
             self.assertIn("settings", names)
             self.assertIn("key_store", names)
+            self.assertIn("shared_entries", names)
+            self.assertIn("import_export_history", names)
+            self.assertIn("contacts", names)
         finally:
             conn.close()
 

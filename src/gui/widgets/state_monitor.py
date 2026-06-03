@@ -10,6 +10,7 @@ from src.core.state_manager import get_state_manager
 # простое окно-монитор для просмотра текущего состояния
 class StateMonitor(QDialog):
 
+    """Публичный класс StateMonitor."""
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Монитор состояний")

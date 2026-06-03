@@ -10,6 +10,10 @@ from typing import Optional
 
 from .key_derivation import derive_key_argon2, derive_key_pbkdf2
 from .key_storage import save_key_metadata, load_key_metadata, cache_key
+from src.core.security.memory_guard import stack_canary_ok, wipe_local
+from src.core.security.side_channel_protection import constant_time_compare
+
+_STACK_CANARY = 0xC0FFEE42
 
 _SESSION_UNLOCKED = False
 _AUTH_KEY_TYPE = "master_auth"
@@ -18,14 +22,17 @@ _failed_attempt_count = 0
 
 
 def has_master_password() -> bool:
+    """Has master password."""
     return load_key_metadata(_AUTH_KEY_TYPE) is not None
 
 
 def is_mfa_available() -> bool:
+    """Is mfa available."""
     return False
 
 
 def is_password_strong(password: str) -> bool:
+    """Is password strong."""
     if len(password) < 12:
         return False
 
@@ -47,6 +54,7 @@ def is_password_strong(password: str) -> bool:
 
 
 def set_master_password(password: str) -> None:
+    """Set master password."""
     if not is_password_strong(password):
         raise ValueError("слишком простой мастер-пароль")
     salt_auth = os.urandom(16)
@@ -66,6 +74,8 @@ def set_master_password(password: str) -> None:
 
 
 def verify_master_password(password: str) -> bool:
+    """Verify master password."""
+    canary = _STACK_CANARY
     info = load_key_metadata(_AUTH_KEY_TYPE)
     if info is None:
         return False
@@ -78,18 +88,25 @@ def verify_master_password(password: str) -> bool:
 
     key = derive_key_argon2(password, salt)
     hash_hex = binascii.hexlify(key).decode("ascii")
-
-    if secrets.compare_digest(hash_hex, expected_hash):
-        cache_key(_AUTH_KEY_TYPE, key)
-        return True
-    return False
+    key_buf = bytearray(key)
+    try:
+        # SC-1 / MEM-4: constant-time compare + stack canary + wipe derived key
+        ok = constant_time_compare(hash_hex, expected_hash)
+        if ok:
+            cache_key(_AUTH_KEY_TYPE, key)
+        return ok and stack_canary_ok(_STACK_CANARY, canary)
+    finally:
+        wipe_local(key_buf)
 
 
 def unlock_session(password: str) -> bool:
+    """Unlock session."""
     global _SESSION_UNLOCKED, _failed_attempt_count
     if verify_master_password(password):
         _SESSION_UNLOCKED = True
         get_encryption_key(password)
+        from src.core.audit.log_signer import cache_audit_signing_key
+        cache_audit_signing_key(password)
         _failed_attempt_count = 0
         return True
     _failed_attempt_count += 1
@@ -104,19 +121,23 @@ def unlock_session(password: str) -> bool:
 
 
 def get_failed_attempt_count() -> int:
+    """Get failed attempt count."""
     return _failed_attempt_count
 
 
 def lock_session() -> None:
+    """Lock session."""
     global _SESSION_UNLOCKED
     _SESSION_UNLOCKED = False
 
 
 def is_session_unlocked() -> bool:
+    """Is session unlocked."""
     return _SESSION_UNLOCKED
 
 
 def get_encryption_key(password: str) -> bytes:
+    """Get encryption key."""
     info = load_key_metadata(_ENC_KEY_TYPE)
     if info is None:
         salt = os.urandom(16)

@@ -1,0 +1,248 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.0, pytest-9.0.3, pluggy-1.6.0
+rootdir: C:\Users\moroz\PycharmProjects\crypto
+configfile: pytest.ini
+plugins: cov-7.1.0, html-4.2.0, metadata-3.1.1
+collected 151 items / 2 deselected / 149 selected
+
+tests\test_audit_sprint5_validation.py .....                             [  3%]
+tests\test_clipboard_sprint4.py .....                                    [  6%]
+tests\test_crypto.py ...                                                 [  8%]
+tests\test_database.py ..                                                [ 10%]
+tests\test_events.py ..                                                  [ 11%]
+tests\test_security.py ..........                                        [ 18%]
+tests\test_sprint3.py ....                                               [ 20%]
+tests\test_sprint6_validation.py ......................                  [ 35%]
+tests\test_sprint7_integration.py ....                                   [ 38%]
+tests\test_sprint7_platform.py .......sssss                              [ 46%]
+tests\test_sprint7_security_principles.py ....                           [ 48%]
+tests\test_sprint7_security_validation.py .......s                       [ 54%]
+tests\test_sprint8.py ...............                                    [ 64%]
+tests\test_sprint8_clipboard_full.py ...                                 [ 66%]
+tests\test_sprint8_coverage.py ....                                      [ 69%]
+tests\test_sprint8_coverage_boost.py ..............                      [ 78%]
+tests\test_sprint8_extended.py ......                                    [ 82%]
+tests\test_sprint8_io.py ...                                             [ 84%]
+tests\test_sprint8_io_integration.py ....                                [ 87%]
+tests\test_sprint8_models.py ......                                      [ 91%]
+tests\test_sprint8_src_coverage.py .............                         [100%]
+
+============================== warnings summary ===============================
+tests/test_clipboard_sprint4.py: 82 warnings
+tests/test_sprint8.py: 21 warnings
+tests/test_sprint8_clipboard_full.py: 46 warnings
+tests/test_sprint8_coverage_boost.py: 5 warnings
+tests/test_sprint8_src_coverage.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:163: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    copied_at=datetime.utcnow(),
+
+tests/test_clipboard_sprint4.py: 82 warnings
+tests/test_sprint8.py: 21 warnings
+tests/test_sprint8_clipboard_full.py: 46 warnings
+tests/test_sprint8_coverage_boost.py: 5 warnings
+tests/test_sprint8_src_coverage.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:197: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(timespec="seconds"),
+
+tests/test_clipboard_sprint4.py: 469 warnings
+tests/test_sprint8.py: 1 warning
+tests/test_sprint8_clipboard_full.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:330: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    delta = expires_at - datetime.utcnow()
+
+tests/test_clipboard_sprint4.py::TestClipboardAutoClearTiming::test_auto_clear_timing_within_100ms
+tests/test_security.py::TestKeyDerivationConsistency::test_argon2_same_input_same_output_100_times
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_fallback_and_logout
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:240: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(timespec="seconds"),
+
+tests/test_security.py: 6 warnings
+tests/test_sprint6_validation.py: 38 warnings
+tests/test_sprint8.py: 8 warnings
+tests/test_sprint8_coverage.py: 2 warnings
+tests/test_sprint8_coverage_boost.py: 6 warnings
+tests/test_sprint8_extended.py: 4 warnings
+tests/test_sprint8_io.py: 6 warnings
+tests/test_sprint8_io_integration.py: 2 warnings
+  C:\Users\moroz\PycharmProjects\crypto\src\core\crypto\key_storage.py:60: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+tests/test_security.py: 10 warnings
+tests/test_sprint3.py: 220 warnings
+tests/test_sprint6_validation.py: 56 warnings
+tests/test_sprint8.py: 4 warnings
+tests/test_sprint8_coverage_boost.py: 9 warnings
+tests/test_sprint8_extended.py: 16 warnings
+tests/test_sprint8_io.py: 18 warnings
+tests/test_sprint8_io_integration.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\vault\entry_manager.py:196: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+tests/test_sprint3.py::TestSprint3EncryptionRoundTrip::test_encryption_round_trip
+tests/test_sprint7_integration.py::TestInt1Vault::test_int1_encrypt_decrypt_and_secure_search
+tests/test_sprint8.py::TestSprint8Crypto::test_vault_encryption_roundtrip
+  C:\Users\moroz\PycharmProjects\crypto\src\core\vault\encryption_service.py:33: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "created_at": created_at or datetime.utcnow().isoformat(),
+
+tests/test_sprint3.py: 10 warnings
+tests/test_sprint8.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\vault\entry_manager.py:259: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at = datetime.utcnow().isoformat()
+
+tests/test_sprint3.py: 10 warnings
+tests/test_sprint8.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\vault\entry_manager.py:325: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    deleted_at = datetime.utcnow().isoformat()
+
+tests/test_sprint3.py: 10 warnings
+tests/test_sprint8.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\vault\entry_manager.py:326: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expires_at = (datetime.utcnow().timestamp() + 30 * 24 * 3600)
+
+tests/test_sprint3.py: 10 warnings
+tests/test_sprint8.py: 1 warning
+  C:\Users\moroz\PycharmProjects\crypto\src\core\vault\entry_manager.py:327: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    expires_iso = datetime.utcfromtimestamp(expires_at).isoformat()
+
+tests/test_sprint7_integration.py: 1 warning
+tests/test_sprint8_coverage_boost.py: 27 warnings
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:481: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(timespec="seconds"),
+
+tests/test_sprint8.py::TestSprint8Clipboard::test_ephemeral_copy
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_service_paths
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:220: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    copied_at=datetime.utcnow(),
+
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_monitor_start_failure
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:104: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(timespec="seconds"),
+
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_service_paths
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:97: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    {"source": "clipboard_service", "timestamp": datetime.utcnow().isoformat(timespec="seconds")},
+
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_service_paths
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:371: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(timespec="seconds"),
+
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_service_paths
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:115: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    {"source": "clipboard_service", "timestamp": datetime.utcnow().isoformat(timespec="seconds")},
+
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_service_paths
+  C:\Users\moroz\PycharmProjects\crypto\tests\test_sprint8_coverage_boost.py:253: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    copied_at=__import__("datetime").datetime.utcnow(),
+
+tests/test_sprint8_coverage_boost.py::TestSprint8BoostClipboard::test_clipboard_service_paths
+  C:\Users\moroz\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-1 (_worker_loop)
+  
+  Traceback (most recent call last):
+    File "C:\Users\moroz\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1052, in _bootstrap_inner
+      self.run()
+    File "C:\Users\moroz\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 989, in run
+      self._target(*self._args, **self._kwargs)
+    File "C:\Users\moroz\PycharmProjects\crypto\src\core\events.py", line 53, in _worker_loop
+      handler(event_name, payload)
+    File "C:\Users\moroz\PycharmProjects\crypto\src\core\audit\audit_logger.py", line 178, in _handle_event
+      _append_record(event_name, payload)
+    File "C:\Users\moroz\PycharmProjects\crypto\src\core\audit\audit_logger.py", line 147, in _append_record
+      ensure_signed(signature)
+    File "C:\Users\moroz\PycharmProjects\crypto\src\core\audit\audit_security.py", line 102, in ensure_signed
+      raise ValueError("������ ��� ������� ���������")
+  ValueError: ������ ��� ������� ���������
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+tests/test_sprint8_extended.py::TestSprint8ExtendedClipboard::test_copy_blocked_when_configured
+  C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:148: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(timespec="seconds"),
+
+tests/test_sprint8_models.py::TestSprint8ModelsMigrations::test_direct_migrations_v1_through_v6
+  C:\Users\moroz\PycharmProjects\crypto\src\database\models.py:318: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.12.0-final-0 _______________
+
+Name                                                    Stmts   Miss  Cover
+---------------------------------------------------------------------------
+src\__init__.py                                             1      0 100.0%
+src\core\__init__.py                                        1      0 100.0%
+src\core\audit\__init__.py                                  5      0 100.0%
+src\core\audit\audit_compliance.py                         61      8  86.9%
+src\core\audit\audit_logger.py                            102      8  92.2%
+src\core\audit\audit_security.py                           57     12  78.9%
+src\core\audit\log_entry.py                               127     18  85.8%
+src\core\audit\log_export.py                              140     40  71.4%
+src\core\audit\log_formatters.py                           65      4  93.8%
+src\core\audit\log_integrity.py                           129     38  70.5%
+src\core\audit\log_signer.py                              116     27  76.7%
+src\core\audit\log_storage.py                              77     19  75.3%
+src\core\audit\log_verifier.py                             64      3  95.3%
+src\core\clipboard\__init__.py                              4      0 100.0%
+src\core\clipboard\clipboard_monitor.py                    37      3  91.9%
+src\core\clipboard\clipboard_service.py                   351     51  85.5%
+src\core\config.py                                         43      5  88.4%
+src\core\crypto\__init__.py                                 1      0 100.0%
+src\core\crypto\abstract.py                                13      6  53.8%
+src\core\crypto\authentication.py                         102     21  79.4%
+src\core\crypto\key_derivation.py                          47     12  74.5%
+src\core\crypto\key_storage.py                            130     35  73.1%
+src\core\crypto\memory.py                                   4      0 100.0%
+src\core\crypto\placeholder.py                             17      2  88.2%
+src\core\events.py                                         43      3  93.0%
+src\core\import_export\__init__.py                          9      0 100.0%
+src\core\import_export\exporter.py                        260     61  76.5%
+src\core\import_export\formats\__init__.py                  7      0 100.0%
+src\core\import_export\formats\bw_json_format.py           28      3  89.3%
+src\core\import_export\formats\csv_format.py               61     12  80.3%
+src\core\import_export\formats\json_format.py              20      1  95.0%
+src\core\import_export\formats\lastpass_csv_format.py      27      1  96.3%
+src\core\import_export\formats\native_json_format.py       34      8  76.5%
+src\core\import_export\formats\share_json_format.py        35      9  74.3%
+src\core\import_export\import_checkpoint.py                20      1  95.0%
+src\core\import_export\import_errors.py                    47      1  97.9%
+src\core\import_export\import_security.py                  20      2  90.0%
+src\core\import_export\importer.py                        434    109  74.9%
+src\core\import_export\io_integration.py                  130     43  66.9%
+src\core\import_export\io_keys.py                          33      5  84.8%
+src\core\import_export\key_exchange.py                    136     48  64.7%
+src\core\import_export\share_crypto.py                    204     56  72.5%
+src\core\import_export\share_package_codec.py              24      4  83.3%
+src\core\import_export\sharing_service.py                 215     48  77.7%
+src\core\key_manager.py                                    14      4  71.4%
+src\core\security\__init__.py                               8      0 100.0%
+src\core\security\activity_monitor.py                      81     14  82.7%
+src\core\security\integration.py                           34      2  94.1%
+src\core\security\memory_guard.py                          87     22  74.7%
+src\core\security\panic_mode.py                           157     31  80.3%
+src\core\security\security_config.py                       77     23  70.1%
+src\core\security\side_channel_protection.py               11      0 100.0%
+src\core\state_manager.py                                 125      2  98.4%
+src\core\vault\encryption_service.py                       36      4  88.9%
+src\core\vault\entry_manager.py                           222     56  74.8%
+src\core\vault\password_generator.py                       99     17  82.8%
+src\core\vault\search_index.py                              6      1  83.3%
+src\database\__init__.py                                    1      0 100.0%
+src\database\db.py                                         85     17  80.0%
+src\database\io_storage.py                                145     11  92.4%
+src\database\models.py                                    237     38  84.0%
+---------------------------------------------------------------------------
+TOTAL                                                    4906    969  80.2%
+Coverage HTML written to dir C:\Users\moroz\PycharmProjects\crypto\tests\report\coverage_html
+Coverage JSON written to file C:\Users\moroz\PycharmProjects\crypto\tests\report\coverage.json
+- Generated html report: file:///C:/Users/moroz/PycharmProjects/crypto/tests/report/pytest_report.html -
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_sprint7_platform.py:93: PLAT-2: ������ macOS
+SKIPPED [1] tests\test_sprint7_platform.py:81: PLAT-2: ������ macOS
+SKIPPED [1] tests\test_sprint7_platform.py:109: PLAT-3: ������ Linux
+SKIPPED [1] tests\test_sprint7_platform.py:121: PLAT-3: ������ Linux
+SKIPPED [1] tests\test_sprint7_platform.py:100: PLAT-3: ������ Linux
+SKIPPED [1] tests\test_sprint7_security_validation.py:117: TEST-5: ������ usability-������������ (5+ ����������) � ��. docs/SPRINT7_IMPLEMENTATION.md
+=== 143 passed, 6 skipped, 2 deselected, 1275 warnings in 123.20s (0:02:03) ===
+C:\Users\moroz\PycharmProjects\crypto\src\core\clipboard\clipboard_service.py:240: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat(timespec="seconds"),

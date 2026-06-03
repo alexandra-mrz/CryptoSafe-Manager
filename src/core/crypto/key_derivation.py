@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-# kdf: pbkdf2 и argon2id (одобренные библиотеки)
+# kdf: pbkdf2 и argon2id
 
 import hashlib
 from argon2.low_level import Type, hash_secret_raw
@@ -16,6 +16,7 @@ ARGON2_PARALLELISM_MAX = 8
 
 
 def derive_key_pbkdf2(password: str, salt: bytes, length: int = 32, iterations: int = 100_000) -> bytes:
+    """Derive key pbkdf2."""
     password_bytes = password.encode("utf-8")
     key = hashlib.pbkdf2_hmac("sha256", password_bytes, salt, iterations, dklen=length)
     return key
@@ -46,6 +47,7 @@ def derive_key_argon2(
     memory_cost: int = ARGON2_MEMORY_COST,
     parallelism: int = ARGON2_PARALLELISM,
 ) -> bytes:
+    """Derive key argon2."""
     time_cost, memory_cost, parallelism = _limit_argon2_params(time_cost, memory_cost, parallelism)
     password_bytes = password.encode("utf-8")
     key = hash_secret_raw(
@@ -67,12 +69,14 @@ KEY_TYPE_TOTP = "totp"
 
 
 def derive_key_for_type(key_type: str, password: str, salt: bytes, length: int = 32) -> bytes:
+    """Derive key for type."""
     salt_with_type = salt + key_type.encode("utf-8")
     return derive_key_pbkdf2(password, salt_with_type, length=length)
 
 
 def get_approved_crypto_versions() -> dict:
     # версии одобренных библиотек для аудита
+    """Get approved crypto versions."""
     result = {"hashlib": "stdlib"}
     try:
         import argon2

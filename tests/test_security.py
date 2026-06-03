@@ -1,5 +1,6 @@
 # тесты безопасности: argon2, pbkdf2, кэш ключей, смена пароля
 
+import binascii
 import os
 import tempfile
 import unittest
@@ -20,14 +21,15 @@ from src.core.crypto.key_storage import (
     get_cached_key,
     set_app_active,
     save_key_metadata,
-    load_key_metadata,
 )
 from src.core.crypto.authentication import (
     set_master_password,
     verify_master_password,
     get_encryption_key,
+    unlock_session,
 )
-from src.core.crypto.placeholder import AES256Placeholder
+from src.core.vault.encryption_service import VaultEncryptionService
+from src.core.vault.entry_manager import EntryManager
 from src.database.db import Database
 
 
@@ -129,7 +131,7 @@ class TestPasswordChangeIntegration(unittest.TestCase):
     def setUp(self) -> None:
         fd, self.path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
-        self.db = Database(self.path)
+        self.db = Database(self.path, use_pool=False)
         self._patcher = patch("src.core.crypto.key_storage.get_default_database", return_value=self.db)
         self._patcher.start()
 
@@ -141,38 +143,26 @@ class TestPasswordChangeIntegration(unittest.TestCase):
             pass
 
     def test_change_password_all_entries_accessible_with_new(self) -> None:
-        # 1) создать хранилище с паролем "А"
+        # 1) хранилище с паролем A (схема Sprint 3: encrypted_data BLOB)
         set_master_password(self.PASSWORD_A)
-        key_a = get_encryption_key(self.PASSWORD_A)
-        cipher = AES256Placeholder()
+        self.assertTrue(unlock_session(self.PASSWORD_A))
 
-        # 2) добавить 10 записей
-        conn = self.db.create_connection()
-        try:
-            cur = conn.cursor()
-            from datetime import datetime
-            now = datetime.utcnow().isoformat()
-            self.plaintexts = []
-            for i in range(10):
-                plain = f"password_{i}".encode("utf-8")
-                self.plaintexts.append(plain)
-                enc = cipher.encrypt(plain, key_a)
-                cur.execute(
-                    """
-                    INSERT INTO vault_entries
-                    (title, username, encrypted_password, url, notes, tags, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (f"Entry{i}", f"user{i}", enc.hex(), "", "", "", now, now),
-                )
-            conn.commit()
-        finally:
-            conn.close()
+        # 2) 10 записей через EntryManager (AES-GCM внутри encrypted_data)
+        self.plaintext_passwords = [f"password_{i}" for i in range(10)]
+        em = EntryManager(self.db)
+        for i in range(10):
+            em.create_entry(
+                {
+                    "title": f"Entry{i}",
+                    "username": f"user{i}",
+                    "password": self.plaintext_passwords[i],
+                    "url": "",
+                    "notes": "",
+                    "tags": "",
+                }
+            )
 
-        # 3) сменить пароль на "В" (логика ротации как в change_password_dialog)
-        import binascii
-        from src.core.crypto.key_derivation import derive_key_pbkdf2, derive_key_argon2
-
+        # 3) ротация как в change_password_dialog._rotate_keys (ветка encrypted_data)
         if not verify_master_password(self.PASSWORD_A):
             self.fail("старый пароль должен быть верным")
         old_key = get_encryption_key(self.PASSWORD_A)
@@ -180,45 +170,69 @@ class TestPasswordChangeIntegration(unittest.TestCase):
         new_key = derive_key_pbkdf2(
             self.PASSWORD_B, salt_new, length=32, iterations=100_000
         )
+        vault_cipher = VaultEncryptionService()
         conn = self.db.create_connection()
         try:
             cur = conn.cursor()
-            cur.execute("SELECT id, encrypted_password FROM vault_entries")
+            cur.execute("SELECT id, encrypted_data FROM vault_entries ORDER BY id")
             rows = cur.fetchall()
+            self.assertEqual(len(rows), 10)
+            conn.execute("BEGIN")
             for row in rows:
-                entry_id = row[0]
-                enc_value = row[1]
-                if enc_value:
-                    old_bytes = bytes.fromhex(enc_value)
-                    plain = cipher.decrypt(old_bytes, old_key)
-                    new_bytes = cipher.encrypt(plain, new_key)
-                    cur.execute(
-                        "UPDATE vault_entries SET encrypted_password = ? WHERE id = ?",
-                        (new_bytes.hex(), entry_id),
-                    )
+                enc_value = row["encrypted_data"]
+                if not enc_value:
+                    continue
+                payload = vault_cipher.decrypt_entry(bytes(enc_value), old_key)
+                data = payload.get("data") or {}
+                if not isinstance(data, dict):
+                    data = {}
+                created_at_payload = str(payload.get("created_at", "") or "")
+                version_payload = int(payload.get("v", 1) or 1)
+                new_blob = vault_cipher.encrypt_entry(
+                    data,
+                    new_key,
+                    created_at=created_at_payload,
+                    version=version_payload,
+                )
+                cur.execute(
+                    "UPDATE vault_entries SET encrypted_data = ? WHERE id = ?",
+                    (new_blob, row["id"]),
+                )
             conn.commit()
         finally:
             conn.close()
 
-        auth_salt = os.urandom(16)
-        auth_key = derive_key_argon2(self.PASSWORD_B, auth_salt)
+        salt_auth = os.urandom(16)
+        auth_key = derive_key_argon2(self.PASSWORD_B, salt_auth)
         auth_hash_hex = binascii.hexlify(auth_key).decode("ascii")
-        auth_salt_hex = binascii.hexlify(auth_salt).decode("ascii")
-        save_key_metadata("master_auth", auth_salt_hex, auth_hash_hex, "argon2id_t3_m64mb_p4_32")
-        save_key_metadata("master_enc", binascii.hexlify(salt_new).decode("ascii"), "", "pbkdf2_sha256_100000_32")
+        auth_salt_hex = binascii.hexlify(salt_auth).decode("ascii")
+        save_key_metadata(
+            "master_auth",
+            auth_salt_hex,
+            auth_hash_hex,
+            "argon2id_t3_m64mb_p4_32",
+        )
+        cache_key("master_auth", auth_key)
+        save_key_metadata(
+            "master_enc",
+            binascii.hexlify(salt_new).decode("ascii"),
+            "",
+            "pbkdf2_sha256_100000_32",
+        )
+        cache_key("master_enc", new_key)
 
-        # 4) убедиться, что все записи доступны с новым паролем
+        # 4) все записи читаются с ключом от пароля B
         key_b = get_encryption_key(self.PASSWORD_B)
         conn = self.db.create_connection()
         try:
             cur = conn.cursor()
-            cur.execute("SELECT id, encrypted_password FROM vault_entries ORDER BY id")
+            cur.execute("SELECT encrypted_data FROM vault_entries ORDER BY id")
             rows = cur.fetchall()
             self.assertEqual(len(rows), 10)
             for i, row in enumerate(rows):
-                enc_value = row[1]
-                dec = cipher.decrypt(bytes.fromhex(enc_value), key_b)
-                self.assertEqual(dec, self.plaintexts[i])
+                dec = vault_cipher.decrypt_entry(bytes(row["encrypted_data"]), key_b)
+                data = dec.get("data") or {}
+                self.assertEqual(data.get("password"), self.plaintext_passwords[i])
         finally:
             conn.close()
 
