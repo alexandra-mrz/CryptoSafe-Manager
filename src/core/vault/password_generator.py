@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import List
 
 
-AMBIGUOUS = set("Il1O0")
 SYMBOLS = "!@#$%^&*"
 
 
@@ -18,7 +17,6 @@ class PasswordGenOptions:
     use_lowercase: bool = True
     use_digits: bool = True
     use_symbols: bool = True
-    exclude_ambiguous: bool = True
 
 
 _history: List[str] = []
@@ -42,13 +40,6 @@ def _digits() -> str:
 def _symbols() -> str:
     """Вернуть набор символов."""
     return SYMBOLS
-
-
-def _filter_ambiguous(chars: str, exclude: bool) -> str:
-    """Убрать неоднозначные символы при необходимости."""
-    if not exclude:
-        return chars
-    return "".join(c for c in chars if c not in AMBIGUOUS)
 
 
 def _clamp_length(n: int) -> int:
@@ -90,15 +81,15 @@ def generate_password(options: PasswordGenOptions | None = None) -> str:
     required: List[str] = []
 
     if opts.use_uppercase:
-        p = _filter_ambiguous(_letters_upper(), opts.exclude_ambiguous)
+        p = _letters_upper()
         pools.append(p)
         required.append(secrets.choice(p))
     if opts.use_lowercase:
-        p = _filter_ambiguous(_letters_lower(), opts.exclude_ambiguous)
+        p = _letters_lower()
         pools.append(p)
         required.append(secrets.choice(p))
     if opts.use_digits:
-        p = _filter_ambiguous(_digits(), opts.exclude_ambiguous)
+        p = _digits()
         pools.append(p)
         required.append(secrets.choice(p))
     if opts.use_symbols:

@@ -226,7 +226,12 @@ class SettingsDialog(QDialog):
         widget = QWidget(self)
         layout = QVBoxLayout(widget)
 
-        layout.addWidget(QLabel("backup и экспорт будут добавлены в следующих спринтах."))
+        layout.addWidget(
+            QLabel(
+                "Резервная копия и восстановление — меню «Файл».\n"
+                "Экспорт/импорт записей — меню «Данные»."
+            )
+        )
         return widget
 
     def accept(self) -> None:

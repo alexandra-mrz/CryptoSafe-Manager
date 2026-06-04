@@ -9,6 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from src.core.audit.log_signer import cache_audit_signing_key
 from src.core.crypto.authentication import set_master_password, unlock_session
 from src.core.import_export.exporter import VaultExporter
 from src.core.import_export.formats.native_json_format import is_native_export_package
@@ -42,6 +43,7 @@ class _IoVaultBase(unittest.TestCase):
             p.start()
         set_master_password(_MASTER)
         unlock_session(_MASTER)
+        cache_audit_signing_key(_MASTER)
         self.em = EntryManager(db=self.db)
 
     def tearDown(self) -> None:

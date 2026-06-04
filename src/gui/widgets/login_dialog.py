@@ -39,8 +39,8 @@ class LoginDialog(QDialog):
 
     def exec(self) -> int:
         # PLAT-1: Secure Desktop на Windows (fallback — обычный диалог)
-        """Exec."""
-        _used_secure, code = prompt_with_secure_desktop_fallback(lambda: super().exec())
+        # super() в lambda недоступен — вызываем базовый QDialog.exec явно
+        _used_secure, code = prompt_with_secure_desktop_fallback(lambda: QDialog.exec(self))
         return code
 
     def _on_ok(self) -> None:

@@ -14,17 +14,28 @@ REPORT_DIR = ROOT / "tests" / "report"
 
 def _run_pytest() -> tuple[int, str]:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    check = subprocess.run(
+        [sys.executable, "-m", "pytest", "--version"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if check.returncode != 0:
+        msg = (
+            f"{sys.executable}: pytest not installed.\n"
+            "Activate .venv and run: pip install -r requirements.txt\n"
+            "Then: python tests/generate_test_report.py\n"
+        )
+        (REPORT_DIR / "pytest_console.txt").write_text(msg + (check.stderr or ""), encoding="utf-8")
+        return 1, msg
+
     cmd = [
         sys.executable,
         "-m",
         "pytest",
         "tests/",
-        "--ignore=tests/test_gui_pyautogui.py",
-        "--ignore=tests/test_integration_app.py",
-        "--ignore=tests/test_perf_sprint3.py",
-        "--ignore=tests/test_perf_sprint4.py",
-        "--ignore=tests/test_perf_sprint5.py",
-        "--ignore=tests/test_perf_sprint7.py",
         "-k",
         "not test_perf3_qr_generation_under_100ms and not test_export_import_1000_performance",
         "-o",
@@ -135,12 +146,18 @@ def write_summary_markdown(exit_code: int, pytest_output: str) -> Path:
 
 def main() -> int:
     exit_code, output = _run_pytest()
+    if "pytest not installed" in output:
+        print(output.strip())
+        return 1
     summary_path = write_summary_markdown(exit_code, output)
     total_pct, _ = _load_coverage()
     print(f"Report written to {summary_path}")
-    print(f"Total coverage: {total_pct:.1f}%")
     if exit_code != 0:
         print("Some tests failed — see tests/report/pytest_console.txt")
+        if not output.strip() or "passed" not in output:
+            print("Coverage below may be stale (from an earlier run).")
+        return exit_code
+    print(f"Total coverage: {total_pct:.1f}%")
     # exit 1 if coverage below 80% (TEST-2)
     if total_pct < 80.0:
         print("Coverage below 80% target (TEST-2)")

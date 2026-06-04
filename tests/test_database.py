@@ -55,6 +55,57 @@ class TestDatabaseConnectivityAndSchema(unittest.TestCase):
         finally:
             conn.close()
 
+    def test_backup_and_restore_roundtrip(self) -> None:
+        conn = self.db.create_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO vault_entries (encrypted_data, created_at, updated_at, tags) "
+                "VALUES (?, ?, ?, ?)",
+                (b"\x00" * 32, "2020-01-01", "2020-01-01", "t"),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+        fd, backup_path = tempfile.mkstemp(suffix=".db")
+        os.close(fd)
+        try:
+            self.db.backup_database(backup_path)
+            conn = self.db.create_connection()
+            try:
+                conn.execute("DELETE FROM vault_entries")
+                conn.commit()
+            finally:
+                conn.close()
+
+            self.db.restore_database(backup_path)
+            conn2 = sqlite3.connect(self.path)
+            try:
+                count = conn2.execute("SELECT COUNT(*) FROM vault_entries").fetchone()[0]
+                self.assertEqual(int(count), 1)
+            finally:
+                conn2.close()
+        finally:
+            try:
+                os.remove(backup_path)
+            except OSError:
+                pass
+
+    def test_restore_rejects_invalid_file(self) -> None:
+        fd, bad_path = tempfile.mkstemp(suffix=".db")
+        os.close(fd)
+        try:
+            with open(bad_path, "wb") as f:
+                f.write(b"not a sqlite database")
+            with self.assertRaises(ValueError):
+                self.db.restore_database(bad_path)
+        finally:
+            try:
+                os.remove(bad_path)
+            except OSError:
+                pass
+
 
 if __name__ == "__main__":
     unittest.main()

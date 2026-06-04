@@ -11,6 +11,7 @@ from unittest.mock import patch
 import pytest
 
 from src.bootstrap import initialize_application
+from src.core.audit.log_signer import cache_audit_signing_key
 from src.core.clipboard.clipboard_service import ClipboardService
 from src.core.clipboard.platform_adapter import InMemoryClipboardAdapter
 from src.core.crypto.authentication import (
@@ -56,6 +57,7 @@ def entry_manager(vault_key: bytes) -> EntryManager:
         p.start()
     set_master_password(_MASTER)
     unlock_session(_MASTER)
+    cache_audit_signing_key(_MASTER)
     mgr = EntryManager(db=db)
     mgr._tmp = tmp  # noqa: SLF001 — удержать temp dir
     mgr._patchers = patchers  # noqa: SLF001

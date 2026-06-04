@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QSystemTrayIcon,
+    QFileDialog,
 )
 
 from PyQt6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPixmap
@@ -79,7 +80,7 @@ from src.core.security.security_config import (
     validate_settings,
 )
 from src.gui.widgets.lock_overlay import LockOverlay
-from src.gui.ux_helpers import run_with_progress, show_exception, show_user_error
+from src.gui.ux_helpers import USER_HINTS, run_with_progress, show_exception, show_user_error
 
 # UX-4: порог «большого» vault — расшифровываем порциями
 _LAZY_VAULT_LIMIT = 200
@@ -453,7 +454,10 @@ class MainWindow(QMainWindow):
         self.action_new = self.file_menu.addAction("Мастер-пароль / первое создание")
         self.action_new.triggered.connect(self._open_setup_wizard)
 
-        self.action_backup = self.file_menu.addAction("Резервная копия")
+        self.action_backup = self.file_menu.addAction("Резервная копия...")
+        self.action_backup.triggered.connect(self._on_backup_database)
+        self.action_restore = self.file_menu.addAction("Восстановить из копии...")
+        self.action_restore.triggered.connect(self._on_restore_database)
         self.data_menu = QMenu("Данные", self)
         menu_bar.addMenu(self.data_menu)
         self.action_export = self.data_menu.addAction("Экспорт...")
@@ -1127,6 +1131,107 @@ class MainWindow(QMainWindow):
         dlg = ChangePasswordDialog(self)
         dlg.exec()
 
+    def _on_backup_database(self) -> None:
+        from datetime import timezone
+
+        from src.database.db import get_default_database
+
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        default_name = f"cryptosafe-backup-{stamp}.db"
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Резервная копия базы",
+            default_name,
+            "SQLite (*.db);;All files (*.*)",
+        )
+        if not path:
+            return
+        if not str(path).lower().endswith(".db"):
+            path = f"{path}.db"
+
+        def work() -> None:
+            get_default_database().backup_database(path)
+            self._bus.publish(
+                "DatabaseBackedUp",
+                {"source": "main_window", "destination": str(path)},
+            )
+
+        try:
+            run_with_progress(self, "Создание резервной копии...", work)
+            QMessageBox.information(
+                self,
+                "Резервная копия",
+                f"Копия базы сохранена:\n{path}",
+            )
+        except Exception as exc:
+            show_exception(self, exc, code="backup_failed")
+
+    def _on_restore_database(self) -> None:
+        from src.core.audit.audit_logger import reload_chain_state
+        from src.database.db import get_default_database
+
+        if not has_master_password():
+            show_user_error(self, "setup_failed")
+            return
+
+        confirm = QMessageBox.warning(
+            self,
+            "Восстановление",
+            "Текущая база будет заменена выбранной копией.\n"
+            "Старая база сохранится рядом с файлом (*.pre-restore-*.db).\n\n"
+            "Продолжить?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Восстановить из копии",
+            "",
+            "SQLite (*.db);;All files (*.*)",
+        )
+        if not path:
+            return
+
+        password, ok = QInputDialog.getText(
+            self,
+            "Подтверждение",
+            "Введите мастер-пароль для восстановления:",
+            QLineEdit.EchoMode.Password,
+        )
+        if not ok or not password:
+            return
+        if not verify_master_password(password):
+            show_user_error(self, "wrong_password")
+            return
+
+        def work() -> None:
+            self._clipboard_service.force_clear(reason="restore")
+            clear_all_keys()
+            lock_session()
+            get_default_database().restore_database(path)
+            reload_chain_state()
+            self._bus.drain_async_handlers()
+            verify_on_startup()
+
+        try:
+            run_with_progress(self, "Восстановление базы...", work)
+        except Exception as exc:
+            show_exception(self, exc, code="restore_failed")
+            return
+
+        self._state_manager.state.locked = True
+        self._locked = True
+        self._table.set_show_passwords(False)
+        self._lock_overlay.show_overlay()
+        self._update_lock_label()
+        self._update_integrity_label()
+        self._load_vault_entries()
+        title, hint = USER_HINTS["restore_ok"]
+        QMessageBox.information(self, title, f"{hint}\n\nФайл: {path}")
+
     def _load_vault_entries(self) -> None:
         """Загрузить записи и применить текущий фильтр."""
         if self._locked:
@@ -1509,7 +1614,8 @@ class MainWindow(QMainWindow):
             self.action_scan_qr.setText("Сканировать QR (камера)...")
             self.help_menu.setTitle("Справка")
             self.action_new.setText("Мастер-пароль / первое создание")
-            self.action_backup.setText("Резервная копия")
+            self.action_backup.setText("Резервная копия...")
+            self.action_restore.setText("Восстановить из копии...")
             self.action_exit.setText("Выход")
             self.action_clear_clipboard.setText("Очистить буфер")
             self.action_reveal_clipboard.setText("Показать буфер (пароль)")
@@ -1530,7 +1636,8 @@ class MainWindow(QMainWindow):
             self.action_scan_qr.setText("Scan QR (camera)...")
             self.help_menu.setTitle("Help")
             self.action_new.setText("Master password / first setup")
-            self.action_backup.setText("Backup")
+            self.action_backup.setText("Backup...")
+            self.action_restore.setText("Restore from backup...")
             self.action_exit.setText("Exit")
             self.action_clear_clipboard.setText("Clear clipboard")
             self.action_reveal_clipboard.setText("Reveal clipboard (password)")

@@ -56,6 +56,12 @@ USER_HINTS: dict[str, tuple[str, str]] = {
 
     "change_password_failed": ("Не удалось сменить мастер-пароль.", "Проверьте текущий пароль и повторите."),
 
+    "backup_failed": ("Не удалось создать резервную копию.", "Проверьте путь, права на запись и свободное место на диске."),
+
+    "restore_failed": ("Восстановление не выполнено.", "Выберите файл *.db, созданный CryptoSafe, и повторите."),
+
+    "restore_ok": ("База восстановлена.", "Войдите с мастер-паролем заново. Предыдущая БД сохранена как *.db.old."),
+
     "audit_access_denied": ("Нет доступа к журналу аудита.", "Разблокируйте хранилище или войдите с правами администратора."),
 
     "generic_error": ("Операция не выполнена.", "Повторите позже. Подробности — в логе приложения."),
@@ -141,6 +147,14 @@ def exception_to_code(exc: BaseException) -> str:
         if "пуст" in msg or "empty" in msg:
 
             return "empty_vault"
+
+        if any(k in msg for k in ("резерв", "backup", "копи")):
+
+            return "backup_failed"
+
+        if any(k in msg for k in ("восстанов", "restore", "cryptosafe")):
+
+            return "restore_failed"
 
     return "generic_error"
 

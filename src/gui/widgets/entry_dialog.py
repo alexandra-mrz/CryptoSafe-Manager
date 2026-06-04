@@ -42,8 +42,6 @@ class _PasswordGenDialog(QDialog):
         self.cb_digits.setChecked(True)
         self.cb_symbols = QCheckBox("!@#$%^&*", self)
         self.cb_symbols.setChecked(True)
-        self.cb_amb = QCheckBox("Исключить I,l,1,0,O", self)
-        self.cb_amb.setChecked(True)
 
         form = QFormLayout()
         form.addRow("Длина", self.length_spin)
@@ -52,7 +50,6 @@ class _PasswordGenDialog(QDialog):
         form.addRow("", self.cb_lower)
         form.addRow("", self.cb_digits)
         form.addRow("", self.cb_symbols)
-        form.addRow("", self.cb_amb)
 
         btn_ok = QPushButton("Сгенерировать", self)
         btn_cancel = QPushButton("Отмена", self)
@@ -75,7 +72,6 @@ class _PasswordGenDialog(QDialog):
             use_lowercase=bool(self.cb_lower.isChecked()),
             use_digits=bool(self.cb_digits.isChecked()),
             use_symbols=bool(self.cb_symbols.isChecked()),
-            exclude_ambiguous=bool(self.cb_amb.isChecked()),
         )
 
 

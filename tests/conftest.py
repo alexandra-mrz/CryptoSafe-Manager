@@ -1,8 +1,15 @@
 from __future__ import annotations
 
-# Sprint 8 / TEST-4: маркировка perf/slow для быстрого прогона по умолчанию
+# Sprint 8 / TEST-4: маркировка perf/slow для быстрого прогона по умолчанию.
+#
+# Два режима:
+#   pytest                          — TEST-1 + регрессия, без perf/slow (TEST-4)
+#   python tests/generate_test_report.py — полный прогон + coverage ≥80% (TEST-2, TEST-3)
 
 import pytest
+
+pytest_plugins = ["tests.sprint8_fixtures"]
+
 
 @pytest.fixture(autouse=True)
 def _reset_io_abort_flag() -> None:
@@ -14,26 +21,11 @@ def _reset_io_abort_flag() -> None:
     set_io_aborted(False)
 
 
-_PERF_MODULES = frozenset(
-    {
-        "test_perf_sprint3",
-        "test_perf_sprint4",
-        "test_perf_sprint5",
-        "test_perf_sprint7",
-        "test_gui_pyautogui",
-        "test_integration_app",
-    }
-)
-
 _SLOW_MODULES = frozenset(
     {
         "test_sprint6_validation",
         "test_audit_sprint5_validation",
         "test_sprint8_io",
-        "test_sprint8_src_coverage",
-        "test_sprint8_extended",
-        "test_sprint8_io_integration",
-        "test_sprint8_coverage_boost",
     }
 )
 
@@ -68,7 +60,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
         cls = getattr(item, "cls", None)
         cls_name = cls.__name__ if cls is not None else ""
 
-        if mod in _PERF_MODULES or cls_name in _PERF_CLASSES or item.name in _PERF_TESTS:
+        if cls_name in _PERF_CLASSES or item.name in _PERF_TESTS:
             item.add_marker(pytest.mark.perf)
         elif mod in _SLOW_MODULES or item.name in _SLOW_TESTS:
             item.add_marker(pytest.mark.slow)

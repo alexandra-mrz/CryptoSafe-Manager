@@ -30,6 +30,7 @@ from src.core.audit.log_export import (
 from src.core.clipboard.clipboard_service import ClipboardService, SecureClipboardItem
 from src.core.clipboard.platform_adapter import InMemoryClipboardAdapter
 from src.core.config import AppConfig, ConfigManager
+from src.core.audit.log_signer import cache_audit_signing_key
 from src.core.crypto.authentication import set_master_password, unlock_session
 from src.core.events import get_event_bus
 from src.core.import_export.exporter import VaultExporter
@@ -80,6 +81,7 @@ class _VaultBase(unittest.TestCase):
             p.start()
         set_master_password(_MASTER)
         unlock_session(_MASTER)
+        cache_audit_signing_key(_MASTER)
         self.em = EntryManager(db=self.db)
 
     def tearDown(self) -> None:

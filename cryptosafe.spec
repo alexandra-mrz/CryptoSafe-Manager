@@ -3,13 +3,23 @@
 
 from pathlib import Path
 
+import pyzbar
+
 block_cipher = None
 root = Path(SPECPATH)
+
+# pyzbar на Windows требует libiconv.dll и libzbar-64.dll рядом с пакетом
+_pyzbar_dir = Path(pyzbar.__file__).resolve().parent
+_pyzbar_binaries = []
+for _dll_name in ("libiconv.dll", "libzbar-64.dll", "libzbar.dll"):
+    _dll_path = _pyzbar_dir / _dll_name
+    if _dll_path.is_file():
+        _pyzbar_binaries.append((str(_dll_path), "pyzbar"))
 
 a = Analysis(
     [str(root / "run.py")],
     pathex=[str(root)],
-    binaries=[],
+    binaries=_pyzbar_binaries,
     datas=[],
     hiddenimports=[
         "argon2",
@@ -30,6 +40,7 @@ a = Analysis(
         "PIL.Image",
         "qrcode",
         "pyzbar",
+        "pyzbar.pyzbar",
         "src",
         "src.bootstrap",
         "src.gui.main_window",
@@ -77,6 +88,6 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=True,
-    upx_exclude=[],
+    upx_exclude=[Path(src).name for src, _dest in _pyzbar_binaries],
     name="CryptoSafeManager",
 )

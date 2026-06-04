@@ -110,10 +110,13 @@ main.py
 
 | Область | Файл |
 |---------|------|
-| Crypto, vault, clipboard, import/export | `tests/test_sprint8.py` |
-| Доп. покрытие форматов | `tests/test_sprint8_coverage.py` |
-| Import/export (расширенные) | `tests/test_sprint8_io.py` (slow — только полный отчёт) |
-| Наследие спринтов 3–7 | `tests/test_*.py` |
+| Crypto, vault, clipboard, import/export (канон TEST-1) | `tests/test_sprint8.py` |
+| io_storage, key_exchange, io_integration | `tests/test_sprint8_storage_integration.py` |
+| entry_manager, log_integrity, state_manager | `tests/test_sprint8_core_gaps.py` |
+| Доп. покрытие core (export/import/panic/audit) | `tests/test_sprint8_coverage_boost.py` |
+| Import/export (все форматы) | `tests/test_sprint8_io.py` (slow — полный отчёт) |
+| Общие фикстуры | `tests/sprint8_fixtures.py` (подключается из `conftest.py`) |
+| Наследие спринтов 1–7 | `tests/test_*.py` |
 
 **Быстрый прогон (TEST-4, < 30 с):**
 
@@ -142,16 +145,12 @@ pytest -m "not perf" -o addopts= --cov=src --cov-config=.coveragerc
 - Полный прогон: все functional-тесты, кроме 2 perf-микробенчмарков; slow-тесты включаются (`-o addopts=` сбрасывает фильтр из `pytest.ini`).
 - Скрипт отчёта завершается с кодом **1**, если coverage &lt; 80%.
 
-**Файлы покрытия (дополнительно к `test_sprint8*.py`):**
+**Дополнительно:**
 
 | Файл | Назначение |
 |------|------------|
-| `test_sprint8_src_coverage.py` | io_storage, panic, state_manager, QR (slow) |
-| `test_sprint8_extended.py` | форматы export, sharing, audit rotation (slow) |
-| `test_sprint8_io_integration.py` | io_integration + sharing link (slow) |
-| `test_sprint8_coverage_boost.py` | clipboard, import/export, panic, audit (slow) |
-| `test_sprint8_clipboard_full.py` | clipboard (быстрый прогон) |
-| `test_sprint8_models.py` | миграции БД (быстрый прогон) |
+| `test_sprint8_models.py` | миграции БД |
+| `tests/generate_test_report.py` | TEST-3: summary.md, HTML, coverage_json |
 
 ### TEST-3 — отчёт в `tests/report/` (Must)
 
@@ -174,9 +173,9 @@ pytest -m "not perf" -o addopts= --cov=src --cov-config=.coveragerc
 
 | Метрика | Значение |
 |---------|----------|
-| Coverage (`--cov=src`) | **80.2%** |
-| Полный прогон | 143 passed, 0 failed (~2 мин) |
-| Быстрый прогон | 66 passed, &lt; 30 с |
+| Coverage (`--cov=src` + `.coveragerc`) | **≥80%** (прогон `generate_test_report.py`) |
+| Полный прогон | все functional-тесты, ~2 мин |
+| Быстрый прогон | `pytest` — без perf/slow, &lt; 30 с |
 
 ### Зависимости
 
@@ -233,25 +232,30 @@ python run.py
 
 ### DOC-1 — README.md (Must)
 
-Файл `README.md` содержит:
+Файл `README.md` (оглавление, таблицы, ссылки на DOC-2/3):
 
 | Раздел | Статус |
 |--------|--------|
 | Обзор и назначение проекта | ✅ |
-| Установка, тесты, запуск | ✅ |
-| Основные функции со скриншотами | ✅ `docs/screenshots/*.png` |
-| Известные ограничения | ✅ |
-| Планы развития (future work) | ✅ |
+| Дорожная карта 8 спринтов (Sprint 1 / ARC-3) | ✅ |
+| ASCII-диаграмма MVC + ссылка на Mermaid в `technical.md` | ✅ |
+| Установка, venv, тесты, запуск, сборка exe | ✅ |
+| Таблица функций → разделы user_guide | ✅ |
+| Скриншоты основных экранов | ✅ `docs/screenshots/*.png` |
+| Раздел «Для проверяющего» (запуск, контакт, репозиторий) | ✅ |
+| Известные ограничения и future work | ✅ |
 
 ### DOC-2 — user_guide.md (Must)
 
-`docs/user_guide.md`:
+`docs/user_guide.md` (оглавление, пошаговые таблицы):
 
-- установка и запуск (исходники + exe)
-- мастер-пароль и vault
-- добавление / изменение / удаление записей
+- установка и запуск (Windows / macOS / Linux, exe и исходники)
+- мастер-пароль, блокировка, panic mode
+- CRUD записей, генератор паролей
 - защищённый буфер обмена
-- import / export / share
+- import / export / share / QR
+- резервная копия и восстановление БД
+- журнал аудита и настройки
 
 ### DOC-3 — technical.md (Must)
 

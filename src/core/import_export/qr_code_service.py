@@ -21,13 +21,13 @@ except ImportError:
     ERROR_CORRECT_M = 0
     _HAS_QRCODE = False
 
-# QR-2: чтение из файла картинки
+# QR-2: чтение из файла картинки (pyzbar опционален — не блокирует запуск exe)
 try:
     from pyzbar.pyzbar import decode as pyzbar_decode
     from PIL import Image
 
     _HAS_PYZBAR = True
-except ImportError:
+except Exception:
     pyzbar_decode = None
     Image = None
     _HAS_PYZBAR = False
